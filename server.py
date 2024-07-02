@@ -17,7 +17,7 @@ class Connection():
         self.position = [0, 0]
         players.append(self)
 
-    def tick(self):
+    def tick(self): #TODO: create a staging function that will allow execute all functions and permit universal outsourcing to functions again
         data = ""
         player_input = None
         while True:
@@ -39,8 +39,10 @@ class Connection():
         return {"position": self.position}
 
 def connection_accept():
+    print("listening")
     while True:
         c, addr = s.accept()
+        print(f"Accepted connection from {addr}")
         Connection(c)
 
 
@@ -48,7 +50,7 @@ players: list[Connection] = []
 
 s.bind(('', env["PORT"]))
 
-s.listen()
+s.listen(0)
 
 threading.Thread(target=connection_accept, daemon=True)
 
