@@ -5,6 +5,9 @@ import os
 
 from pygame import time
 
+with open("env.json") as f:
+    env = json.loads(f.read())
+
 s = socket.socket()
 clock = time.Clock()
 
@@ -43,13 +46,13 @@ def connection_accept():
 
 players: list[Connection] = []
 
-s.bind(('', int(os.environ["PORT"])))
+s.bind(('', env["PORT"]))
 
 s.listen()
 
 threading.Thread(target=connection_accept, daemon=True)
 
-print(f"Server opened on port {os.environ["PORT"]}")
+print(f"Server opened on port {env["PORT"]}")
 
 while True:
     for player in players:
