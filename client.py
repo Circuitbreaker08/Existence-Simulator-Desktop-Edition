@@ -1,7 +1,10 @@
+import threading
 import pygame
 import socket
 import json
 import os
+
+import connection
 
 pygame.init()
 info = pygame.display.Info()
@@ -13,32 +16,21 @@ s = socket.socket()
 with open("env.json") as f:
     env = json.loads(f.read())
 
-class Connection():
-    def __init__(self):
-        data = ""
-        while True:
-            data += s.recv(1024).decode()
-            if "§" in data:
-                packets = data.split("§")
-                data = packets[-1]
-                for packet in packets[:-1]:
-                    packet = json.loads(packet)
-                    getattr(self, packet["type"])
-
-    def tick(self, packet):
-        global players
-        players = packet["body"]
-
 players = []
 
+class Connection(connection.Connection):
+    players = players
+
+    def tick(self):
+        self.run_queue()
+
 s.connect((env["IP"], env["PORT"]))
-print(0)
+c = Connection(s)
 running = True
 while running:
     screen.fill((255, 255, 255))
 
-    Connection()
-    print(f"{players}\r")
+    pygame.event.get()
 
     pygame.display.flip()
     clock.tick(60)

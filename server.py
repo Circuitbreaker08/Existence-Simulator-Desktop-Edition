@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 import threading
 import socket
 import json
 import os
+
+import connection
 
 from pygame import time
 
@@ -10,33 +14,7 @@ with open("env.json") as f:
 
 s = socket.socket()
 clock = time.Clock()
-
-class Connection():
-    def __init__(self, c: socket.socket):
-        self.c = c
-        self.position = [0, 0]
-        players.append(self)
-
-    def tick(self): #TODO: create a staging function that will allow execute all functions and permit universal outsourcing to functions again
-        data = ""
-        player_input = None
-        while True:
-            data += self.c.recv(1024).decode()
-            if "§" in data:
-                packets = data.split("§")
-                data = packets[-1]
-                for packet in packets[:-1]:
-                    packet = json.loads(packet)
-                    if packet["type"] == "input":
-                        player_input = packet
-            else:
-                break
-        if player_input != None:
-            self.position[0] += player_input["body"][0]
-            self.position[1] += player_input["body"][1]
-
-    def transmit(self):
-        return {"position": self.position}
+players: list[Connection] = []
 
 def connection_accept():
     print("listening")
@@ -45,22 +23,19 @@ def connection_accept():
         print(f"Accepted connection from {addr}")
         Connection(c)
 
+class Connection(connection.Connection):
+    players = players
 
-players: list[Connection] = []
+    def tick(self):
+        self.run_queue()
 
 s.bind(('', env["PORT"]))
 
-s.listen(0)
+s.listen()
 
-threading.Thread(target=connection_accept, daemon=True)
+threading.Thread(target=connection_accept, daemon=True).start()
 
 print(f"Server opened on port {env["PORT"]}")
 
 while True:
-    for player in players:
-        player.tick()
-
-    for player in players:
-        player.c.send(json.dumps({"type": "tick", "body": [x.transmit() for x in players]}).encode())
-
     clock.tick(60)
