@@ -1,3 +1,3 @@
 # Existence Simulator Desktop Edition
 
-This is a test
+The newest continuation if the Existence Simulator Franchise of [Gameshub](https://gameshub-dev.netlify.app)
