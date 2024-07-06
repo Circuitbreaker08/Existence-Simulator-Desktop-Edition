@@ -5,16 +5,14 @@ import socket
 import json
 
 class Connection():
-    players: list[Connection] = []
     queue_funcs: list[str] = []
 
     def __init__(self, c: socket.socket):
         self.c = c
         self.func_queue = {}
-        self.players.append(self)
-        threading.Thread(target=self.main, daemon=True).start()
+        threading.Thread(target=self.__main__, daemon=True).start()
 
-    def main(self):
+    def __main__(self):
         data = ""
         try:
             while True:
@@ -30,7 +28,10 @@ class Connection():
                         func(packet)
                 
         except ConnectionResetError:
-            self.players.remove(self)
+            self.__main_error__()
+
+    def __main_error__(self):
+        pass
 
     def run_queue(self):
         for func in self.func_queue:
