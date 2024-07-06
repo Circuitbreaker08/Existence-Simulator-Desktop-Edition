@@ -25,9 +25,7 @@ def connection_accept():
 
 class Connection(connection.Connection):
     players = players
-
-    def tick(self):
-        self.run_queue()
+    queue_funcs = []
 
 s.bind(('', env["PORT"]))
 

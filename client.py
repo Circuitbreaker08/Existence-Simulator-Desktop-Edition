@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import threading
 import pygame
 import socket
@@ -20,9 +22,7 @@ players = []
 
 class Connection(connection.Connection):
     players = players
-
-    def tick(self):
-        self.run_queue()
+    queue_funcs = []
 
 s.connect((env["IP"], env["PORT"]))
 c = Connection(s)
