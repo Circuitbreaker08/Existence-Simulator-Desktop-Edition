@@ -23,10 +23,11 @@ players = []
 class Connection(connection.Connection):
     queue_funcs = ["game_state"]
 
-    def __main_error__(self):
-        pass
+    def game_state(self, payload):
+        global players
+        players = payload["body"]
 
-    def game_state(self):
+    def __main_error__(self):
         pass
 
 s.connect((env["IP"], env["PORT"]))
@@ -37,7 +38,16 @@ while running:
 
     screen.fill((255, 255, 255))
 
-    pygame.event.get()
+    events = pygame.event.get()
+    keys = pygame.key.get_pressed()
+    for event in events:
+        if event.type == pygame.QUIT:
+            running = False
+
+    s.send(f"{json.dumps({"type": "input", "body": [keys[pygame.K_d] - keys[pygame.K_a], keys[pygame.K_s] - keys[pygame.K_w]]})}§".encode())
+
+    for player in players:
+        pygame.draw.rect(screen, (0, 0, 0), pygame.Rect(player, (32, 32)))
 
     pygame.display.flip()
     clock.tick(60)

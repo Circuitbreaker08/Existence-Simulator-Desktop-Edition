@@ -34,5 +34,5 @@ class Connection():
         pass
 
     def run_queue(self):
-        for func in self.func_queue:
+        for func in self.func_queue.values():
             func()

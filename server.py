@@ -14,20 +14,26 @@ with open("env.json") as f:
 
 s = socket.socket()
 clock = time.Clock()
-players: list[Connection] = []
+players: list[Player] = []
 
 def connection_accept():
     print("listening")
     while True:
         c, addr = s.accept()
         print(f"Accepted connection from {addr}")
-        Connection(c)
+        Player(c)
 
-class Connection(connection.Connection):
+class Player(connection.Connection):
     players = players
-    queue_funcs = []
+    queue_funcs = ["input"]
+
+    def input(self, payload):
+        self.position[0] += payload["body"][0]
+        self.position[1] += payload["body"][1]
 
     def __init__(self, c):
+        self.position = [0, 0]
+
         self.players.append(self)
         super().__init__(c)
 
@@ -45,4 +51,10 @@ print(f"Server opened on port {env["PORT"]}")
 while True:
     for conn in players:
         conn.run_queue()
+
+    global_update = json.dumps({"type": "game_state", "body": [x.position for x in players]})
+
+    for conn in players:
+        conn.c.send(f"{global_update}§".encode())
+
     clock.tick(60)
